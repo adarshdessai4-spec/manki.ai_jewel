@@ -41,11 +41,35 @@ const StartDesigningButton = ({
     }
   }, [showModal]);
 
-  const handlePrimaryClick = () => {
-    if (isAuthed && !forceModal) {
-      router.push(targetPath);
-      return;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const syncAuth = () => {
+      setIsAuthed(sessionStorage.getItem("manki_session_auth") === "true");
+    };
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
+
+  const announceAuthChange = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
     }
+    router.refresh();
+  };
+
+  const handlePrimaryClick = () => {
+    const authedNow =
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("manki_session_auth") === "true";
+    setIsAuthed(authedNow);
+    if (authedNow) {
+      setShowModal(false);
+      announceAuthChange();
+      const destination = targetPath ?? "/studio";
+      return router.push(destination);
+    }
+
     onOpen?.();
     setShowModal(true);
     setStatus(null);
@@ -61,15 +85,18 @@ const StartDesigningButton = ({
     if (typeof window !== "undefined") {
       sessionStorage.setItem("manki_session_auth", "true");
       localStorage.setItem("manki_auth", "true");
+      window.dispatchEvent(new Event("storage"));
     }
     setShowModal(false);
     setStatus(null);
-    router.push(destination ?? targetPath);
+    const nextPath = destination ?? targetPath ?? "/studio";
+    router.push(nextPath);
+    announceAuthChange();
   };
 
   const handleGmailLogin = () => {
     setStatus("Signed in with Google (mock)");
-    handleVerify("/dashboard");
+    handleVerify(targetPath ?? "/studio");
   };
 
   return (

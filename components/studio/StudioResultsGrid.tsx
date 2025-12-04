@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { GeneratedDesign } from "@/types/design";
-import { Eye, Heart, HeartOff, Sparkles } from "lucide-react";
+import { Eye, Heart, HeartOff, Sparkles, Rotate3d } from "lucide-react";
+import Design360Viewer from "@/components/Design360Viewer";
 
 interface StudioResultsGridProps {
   designs: GeneratedDesign[];
@@ -19,6 +21,16 @@ const formatPrice = (value: number) =>
 const skeletonCards = Array.from({ length: 4 });
 
 const StudioResultsGrid = ({ designs, isLoading, onToggleSave }: StudioResultsGridProps) => {
+  const [activeDesignId, setActiveDesignId] = useState<string | null>(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const activeDesign = designs.find((d) => d.id === activeDesignId) ?? null;
+
+  useEffect(() => {
+    if (!isViewerOpen) {
+      setActiveDesignId(null);
+    }
+  }, [isViewerOpen]);
+
   if (isLoading) {
     return (
       <div className="grid gap-5 sm:grid-cols-2">
@@ -62,7 +74,15 @@ const StudioResultsGrid = ({ designs, isLoading, onToggleSave }: StudioResultsGr
           className="group rounded-3xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-1 hover:border-[#FACC6B]/60 hover:shadow-[#FACC6B]/30"
         >
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#FACC6B]/15 via-white/5 to-slate-900/60">
-            <div className="aspect-[4/3]" />
+            <div className="aspect-[4/3]">
+              <img
+                src={design.imageUrl || "/diamond_hero_frame.png"}
+                alt={`${design.name} AI preview`}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/40" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.12),transparent_30%)]" />
             <div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1 text-xs text-slate-100 backdrop-blur">
               AI preview
@@ -98,13 +118,14 @@ const StudioResultsGrid = ({ designs, isLoading, onToggleSave }: StudioResultsGr
               {design.styles.map((style) => (
                 <span
                   key={style}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs capitalize text-slate-200"
-                >
-                  {style.replace(/_/g, " ")}
-                </span>
-              ))}
-            </div>
-            <div className="flex items-center justify-between">
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs capitalize text-slate-200"
+              >
+                {style.replace(/_/g, " ")}
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => console.log("View details", design.id)}
@@ -112,13 +133,31 @@ const StudioResultsGrid = ({ designs, isLoading, onToggleSave }: StudioResultsGr
               >
                 <Eye className="h-4 w-4" /> View details
               </button>
-              <span className="text-xs text-slate-400">
-                Budget: {design.budgetRange.replace(/_/g, " ")}
-              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveDesignId(design.id);
+                  setIsViewerOpen(true);
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-[#FACC6B]/60 hover:text-[#FACC6B]"
+              >
+                <Rotate3d className="h-4 w-4" /> 3D view
+              </button>
             </div>
+            <span className="text-xs text-slate-400">
+              Budget: {design.budgetRange.replace(/_/g, " ")}
+            </span>
+          </div>
           </div>
         </div>
       ))}
+      {isViewerOpen && activeDesign && (
+        <Design360Viewer
+          name={activeDesign.name}
+          imageUrl={activeDesign.imageUrl}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   );
 };

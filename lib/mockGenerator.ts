@@ -82,6 +82,15 @@ const jewelleryLabels: Record<JewelleryType, string> = {
 const pickRandom = <T,>(items: T[]): T =>
   items[Math.floor(Math.random() * items.length)];
 
+const sampleImages = [
+  "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1503551723145-6c040742065b?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80",
+];
+
 const buildDescription = (
   design: GeneratedDesign,
   prompt?: string
@@ -117,6 +126,7 @@ export const generateMockDesigns = async (
   const designs: GeneratedDesign[] = Array.from({ length: count }).map((_, index) => {
     const id = crypto.randomUUID();
     const name = buildName(config.jewelleryType, styles);
+    const imageUrl = pickRandom(sampleImages);
     const design: GeneratedDesign = {
       id,
       name,
@@ -126,7 +136,7 @@ export const generateMockDesigns = async (
       budgetRange: config.budgetRange,
       estimatedPrice: derivePrice(config, index),
       description: "",
-      imageUrl: "",
+      imageUrl,
       isSaved: false,
     };
 

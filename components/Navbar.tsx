@@ -17,26 +17,36 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [userName, setUserName] = useState("Designer");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const check = () =>
-      setIsAuthed(
-        sessionStorage.getItem("manki_session_auth") === "true"
-      );
-    check();
-    window.addEventListener("storage", check);
-    return () => window.removeEventListener("storage", check);
+    const sync = () => {
+      setIsAuthed(sessionStorage.getItem("manki_session_auth") === "true");
+      const stored = localStorage.getItem("manki_user_name");
+      setUserName(stored && stored.trim() ? stored : "Designer");
+    };
+    sync();
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
   }, []);
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("manki_session_auth");
       localStorage.removeItem("manki_auth");
+      localStorage.removeItem("manki_user_name");
     }
     setIsAuthed(false);
     setShowMenu(false);
     router.push("/");
+  };
+
+  const goToDashboardSection = (section: "profile" | "designs") => {
+    setShowMenu(false);
+    setIsOpen(false);
+    const path = section === "profile" ? "/dashboard/profile" : "/dashboard/designs";
+    router.push(path);
   };
 
   return (
@@ -81,13 +91,14 @@ const Navbar = () => {
               )
             )}
             <div className="flex items-center gap-3">
-              <StartDesigningButton
-                label="Login"
-                targetPath="/studio"
-                forceModal
-                className="rounded-full bg-[#FACC6B] px-4 py-2 text-sm font-semibold text-[#0f0f0f] hover:text-[#0f0f0f] focus-visible:text-[#0f0f0f] active:text-[#0f0f0f] shadow-lg shadow-[#FACC6B]/30 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
-              />
-              {isAuthed && (
+              {!isAuthed ? (
+                <StartDesigningButton
+                  label="Login"
+                  targetPath="/studio"
+                  forceModal
+                  className="rounded-full bg-[#FACC6B] px-4 py-2 text-sm font-semibold text-[#0f0f0f] hover:text-[#0f0f0f] focus-visible:text-[#0f0f0f] active:text-[#0f0f0f] shadow-lg shadow-[#FACC6B]/30 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
+                />
+              ) : (
                 <div className="relative">
                   <button
                     type="button"
@@ -101,23 +112,29 @@ const Navbar = () => {
                       <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
                         Logged in
                       </p>
-                      <p className="text-sm font-semibold text-white">Designer</p>
+                      <p className="text-sm font-semibold text-white">{userName}</p>
                     </div>
                     <ChevronDown className="ml-2 h-4 w-4 text-slate-400" />
                   </button>
                   {showMenu && (
                     <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-white/10 bg-black/80 py-2 text-sm text-white shadow-xl shadow-black/50 backdrop-blur">
                       <Link
-                        href="/dashboard"
+                        href="/dashboard/profile"
                         className="block px-4 py-2 hover:bg-white/10"
-                        onClick={() => setShowMenu(false)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToDashboardSection("profile");
+                        }}
                       >
-                        My Profile
+                        Profile
                       </Link>
                       <Link
-                        href="/dashboard#designs"
+                        href="/dashboard/designs"
                         className="block px-4 py-2 hover:bg-white/10"
-                        onClick={() => setShowMenu(false)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToDashboardSection("designs");
+                        }}
                       >
                         My Designs
                       </Link>
@@ -170,10 +187,72 @@ const Navbar = () => {
                   </Link>
                 )
               )}
+              {!isAuthed ? (
+                <StartDesigningButton
+                  label="Login"
+                  targetPath="/studio"
+                  forceModal
+                  onOpen={() => setIsOpen(false)}
+                  className="inline-flex items-center justify-center rounded-full bg-[#FACC6B] px-4 py-2 text-sm font-semibold text-[#0f0f0f] hover:text-[#0f0f0f] focus-visible:text-[#0f0f0f] active:text-[#0f0f0f] shadow-lg shadow-[#FACC6B]/30 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
+                />
+              ) : (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowMenu((prev) => !prev)}
+                    className="flex w-full items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-2 shadow-inner shadow-black/60"
+                  >
+                    <span className="mr-2 grid h-10 w-10 place-items-center rounded-full bg-[#FACC6B]/20 text-[#FACC6B]">
+                      <User className="h-5 w-5" />
+                    </span>
+                    <div className="text-left leading-tight">
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-slate-400">
+                        Logged in
+                      </p>
+                      <p className="text-sm font-semibold text-white">{userName}</p>
+                    </div>
+                    <ChevronDown className="ml-auto h-4 w-4 text-slate-400" />
+                  </button>
+                  {showMenu && (
+                    <div className="absolute right-0 z-10 mt-2 w-full min-w-[12rem] rounded-2xl border border-white/10 bg-black/80 py-2 text-sm text-white shadow-xl shadow-black/50 backdrop-blur">
+                      <Link
+                        href="/dashboard/profile"
+                        className="block px-4 py-2 hover:bg-white/10"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToDashboardSection("profile");
+                        }}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/dashboard/designs"
+                        className="block px-4 py-2 hover:bg-white/10"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToDashboardSection("designs");
+                        }}
+                      >
+                        My Designs
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleLogout();
+                          setIsOpen(false);
+                        }}
+                        className="block w-full px-4 py-2 text-left hover:bg-white/10"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               <StartDesigningButton
                 label="Start designing now"
                 onOpen={() => setIsOpen(false)}
-                className="mt-2 inline-flex items-center justify-center rounded-full bg-[#FACC6B] px-4 py-2 text-sm font-semibold text-[#0f0f0f] hover:text-[#0f0f0f] focus-visible:text-[#0f0f0f] active:text-[#0f0f0f] shadow-lg shadow-[#FACC6B]/30 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
+                className="inline-flex items-center justify-center rounded-full bg-[#FACC6B] px-4 py-2 text-sm font-semibold text-[#0f0f0f] hover:text-[#0f0f0f] focus-visible:text-[#0f0f0f] active:text-[#0f0f0f] shadow-lg shadow-[#FACC6B]/30 transition-transform duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
               />
             </div>
           </div>
