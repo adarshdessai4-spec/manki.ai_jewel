@@ -18,6 +18,14 @@ const Design360Viewer = ({ name, imageUrl, onClose }: Design360ViewerProps) => {
   const texture = imageUrl || "/diamond_hero_frame.png";
 
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
