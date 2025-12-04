@@ -1,5 +1,5 @@
-import Link from "next/link";
 import SectionWrapper from "@/components/SectionWrapper";
+import StartDesigningButton from "@/components/StartDesigningButton";
 
 const CallToAction = () => {
   return (
@@ -15,12 +15,10 @@ const CallToAction = () => {
               Open the AI Design Studio to sketch ideas, refine styles, and visualize your next heirloom.
             </p>
           </div>
-          <Link
-            href="/studio"
-            className="inline-flex items-center justify-center rounded-full bg-[#FACC6B] px-6 py-3 text-sm font-semibold text-black shadow-lg shadow-[#FACC6B]/40 transition-all duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
-          >
-            Open AI Design Studio
-          </Link>
+          <StartDesigningButton
+            label="Open AI Design Studio"
+            className="inline-flex items-center justify-center rounded-full bg-[#FACC6B] px-6 py-3 text-sm font-semibold text-[#0f0f0f] hover:text-[#0f0f0f] focus-visible:text-[#0f0f0f] active:text-[#0f0f0f] shadow-lg shadow-[#FACC6B]/40 transition-all duration-200 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FACC6B]"
+          />
         </div>
       </div>
     </SectionWrapper>
