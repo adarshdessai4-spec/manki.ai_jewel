@@ -2,6 +2,11 @@ import Link from "next/link";
 import SectionWrapper from "@/components/SectionWrapper";
 
 const HeroSection = () => {
+  const videoSrc =
+    (process.env.NEXT_PUBLIC_BASE_PATH ??
+      (process.env.NODE_ENV === "production" ? "/manki.ai_jewel" : "")) +
+    "/diamond_hero_cropped.mp4";
+
   return (
     <SectionWrapper className="pt-4 sm:pt-6 lg:pt-8 pb-16 sm:pb-20">
       <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -39,7 +44,7 @@ const HeroSection = () => {
           <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-black/40">
             <div className="relative flex aspect-[4/3] sm:aspect-[16/10] lg:aspect-[16/9] items-center justify-center overflow-hidden">
               <video
-                src="/diamond_hero_cropped.mp4"
+                src={videoSrc}
                 className="absolute inset-0 h-full w-full object-contain pointer-events-none"
                 autoPlay
                 loop
